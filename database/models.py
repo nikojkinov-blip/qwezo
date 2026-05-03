@@ -1,8 +1,8 @@
 import sqlite3
 from datetime import datetime
-from typing import Optional, Dict, List
+import os
 
-DB_PATH = "data/bot.db"
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "bot.db")
 
 class Database:
     _instance = None
@@ -10,6 +10,7 @@ class Database:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
+            os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
             cls._instance.conn = sqlite3.connect(DB_PATH, check_same_thread=False)
             cls._instance.conn.row_factory = sqlite3.Row
             cls._instance.cursor = cls._instance.conn.cursor()
@@ -65,7 +66,6 @@ def confirm_payment(payment_id):
     db.update('payments', {'status': 'confirmed', 'confirmed_at': datetime.now().isoformat()}, 'id=?', (payment_id,))
     pay = db.fetchone("SELECT * FROM payments WHERE id=?", (payment_id,))
     if pay: db.update('users', {'paid': 1}, 'user_id=?', (pay['user_id'],))
-def get_user_payments(user_id): return db.fetchall("SELECT * FROM payments WHERE user_id=? ORDER BY created_at DESC", (user_id,))
 def get_total_stats():
     users = db.fetchone("SELECT COUNT(*) as c FROM users")
     paid = db.fetchone("SELECT COUNT(*) as c FROM users WHERE paid=1")
