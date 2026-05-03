@@ -19,23 +19,28 @@ import os
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-if not BOT_TOKEN:
-    raise ValueError("❌ BOT_TOKEN не найден! Добавь его в Environment Variables на Render.")
+if not BOT_TOKEN: raise ValueError("BOT_TOKEN не найден!")
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
-# API
-app = FastAPI(title="QAZLO API")
+# Импортируем админку
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from web_admin.app import app as admin_app
+
+# Объединяем API и админку
+app = FastAPI(title="QAZLO")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+# Монтируем админку на /admin
+app.mount("/admin", admin_app)
+
 @app.get("/")
-async def root(): return {"status": "ok"}
+async def root(): return {"status": "ok", "admin": "/admin"}
 
 @app.get("/health")
-async def health():
-    from datetime import datetime
-    return {"status": "alive", "timestamp": datetime.now().isoformat()}
+async def health(): return {"status": "alive"}
 
 def run_api(): uvicorn.run(app, host="0.0.0.0", port=10000, log_level="error")
 
@@ -47,7 +52,7 @@ dp.include_router(start_router)
 dp.include_router(payment_router)
 
 async def main():
-    logger.info("🚀 Бот запущен!")
+    logger.info("🚀 Бот + Админка запущены!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
