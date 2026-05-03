@@ -11,7 +11,26 @@ app = FastAPI(title="QAZLO Admin")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "bot.db")
-ADMIN_ID = 6593438966
+
+def init_db():
+    """Создать таблицы если их нет"""
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+        user_id INTEGER PRIMARY KEY, username TEXT, first_name TEXT,
+        joined_date TEXT, paid INTEGER DEFAULT 0, banned INTEGER DEFAULT 0
+    )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER,
+        amount INTEGER, status TEXT DEFAULT 'pending',
+        created_at TEXT, confirmed_at TEXT
+    )''')
+    conn.commit()
+    conn.close()
+
+init_db()
+ADMIN_ID = 7659197701
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
