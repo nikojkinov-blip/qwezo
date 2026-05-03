@@ -20,7 +20,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
-    raise ValueError("❌ BOT_TOKEN не установлен! Проверь Environment Variables на Render.")
+    raise ValueError("❌ BOT_TOKEN не найден! Добавь его в Environment Variables на Render.")
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 @app.get("/")
 async def root():
-    return {"status": "ok", "bot": "qazlo12_bot"}
+    return {"status": "ok"}
 
 @app.get("/health")
 async def health():
@@ -50,7 +50,7 @@ dp.include_router(start_router)
 dp.include_router(payment_router)
 
 async def main():
-    logger.info("🚀 Бот qazlo12_bot запущен!")
+    logger.info("🚀 Бот запущен!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
