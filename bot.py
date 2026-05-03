@@ -25,26 +25,23 @@ if not BOT_TOKEN:
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
-# ==================== API ====================
+# API
 app = FastAPI(title="QAZLO API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 @app.get("/")
-async def root():
-    return {"status": "ok"}
+async def root(): return {"status": "ok"}
 
 @app.get("/health")
 async def health():
     from datetime import datetime
     return {"status": "alive", "timestamp": datetime.now().isoformat()}
 
-def run_api():
-    uvicorn.run(app, host="0.0.0.0", port=10000, log_level="error")
+def run_api(): uvicorn.run(app, host="0.0.0.0", port=10000, log_level="error")
 
-# ==================== BOT ====================
+# Bot
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
-
 dp.include_router(admin_router)
 dp.include_router(start_router)
 dp.include_router(payment_router)
